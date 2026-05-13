@@ -237,18 +237,7 @@ Car.init(
     },
   }
 );
-
-// ================= RELATIONS =================
-
-Car.hasMany(Institution, {
-  foreignKey: "car_id",
-  as: "institutions",
-});
 ```
-
-## Captura del Modelo Car
-
-<!-- INSERTAR CAPTURA AQUÍ -->
 
 ---
 
@@ -388,31 +377,34 @@ Institution.init(
     },
   }
 );
-
-// ================= RELATIONS =================
-
-Institution.belongsTo(Car, {
-  foreignKey: "car_id",
-  as: "car",
-});
 ```
-
-## Captura del Modelo Institution
-
-<!-- INSERTAR CAPTURA AQUÍ -->
 
 ---
 
 # 8. Relaciones Entre Modelos
 
-Se implementó una relación de:
+Inicialmente las relaciones fueron implementadas directamente dentro de los modelos `Car` e `Institution`. Sin embargo, al ejecutar el proyecto se presentó un error de relación circular en Sequelize:
 
-* Un carro puede tener muchas instituciones.
-* Una institución pertenece a un carro.
+```txt
+Institution.belongsTo called with something that's not a subclass of Sequelize.Model
+```
+
+Este error ocurrió porque ambos modelos se importaban mutuamente antes de terminar su inicialización.
+
+Para solucionar este problema, se creó un archivo independiente llamado:
+
+```txt
+src/models/business/index.ts
+```
+
+En este archivo se centralizaron las relaciones entre modelos.
 
 ## Relación Implementada
 
 ```ts
+import { Car } from "./Car";
+import { Institution } from "./Institution";
+
 Car.hasMany(Institution, {
   foreignKey: "car_id",
   as: "institutions",
@@ -424,11 +416,13 @@ Institution.belongsTo(Car, {
 });
 ```
 
-## Captura de Relaciones
+Posteriormente se importó únicamente el archivo `index.ts` de los modelos para evitar dependencias circulares.
 
-<!-- INSERTAR CAPTURA AQUÍ -->
+## Importación Correcta
 
----
+```ts
+import "../models/business";
+```
 
 # 9. Validaciones Implementadas
 
@@ -450,13 +444,6 @@ validate: {
   },
 }
 ```
-
-## Captura de Validaciones
-
-<!-- INSERTAR CAPTURA AQUÍ -->
-
----
-
 # 10. Implementación de Hooks
 
 Se implementaron hooks para detectar eventos antes de crear o actualizar registros.
@@ -474,12 +461,6 @@ hooks: {
   },
 }
 ```
-
-## Captura de Hooks
-
-<!-- INSERTAR CAPTURA AQUÍ -->
-
----
 
 # 11. Manejo de Estado Lógico
 
@@ -499,11 +480,6 @@ status: {
 }
 ```
 
-## Captura del Campo Status
-
-<!-- INSERTAR CAPTURA AQUÍ -->
-
----
 
 # 12. Ejecución del Proyecto
 
@@ -513,6 +489,33 @@ Para ejecutar el proyecto se utilizaron los siguientes comandos:
 npm install
 npm run build
 npm run dev
+```
+
+Al iniciar el servidor, Sequelize realizó automáticamente:
+
+* La conexión a la base de datos.
+* La validación de conexión.
+* La sincronización automática de tablas.
+* La creación de las tablas `car` e `institution`.
+
+Esto fue posible gracias al método:
+
+```ts
+await sequelize.sync({
+  force: false,
+});
+```
+
+Implementado dentro de:
+
+```txt
+src/config/index.ts
+```
+
+También fue necesario importar correctamente los modelos:
+
+```ts
+import "../models/business";
 ```
 
 ## Captura de Ejecución
@@ -534,43 +537,18 @@ Se logró:
 
 ## Captura de Resultados
 
-<!-- INSERTAR CAPTURA AQUÍ -->
+Ejecucion con MySQL
+![TerminalEje](imagenes/F2.png)
+![ModeloMysql](imagenes/F1.png)
+
+
+Ejecucion con Postgres:
+![TerminalEje](imagenes/F3.png)
+![ModeloPostgre](imagenes/F4.png)
 
 ---
 
-# 14. Conclusiones
 
-* Sequelize facilita la administración de modelos y relaciones.
-* TypeScript mejora el tipado y la seguridad del código.
-* Las validaciones ayudan a mantener la integridad de los datos.
-* El uso de `status` permite implementar borrado lógico.
-* La compatibilidad entre motores mejora la flexibilidad del proyecto.
 
 ---
 
-# 15. Recomendaciones
-
-* Mantener organizadas las carpetas del proyecto.
-* Usar variables de entorno para la configuración.
-* Implementar controladores y rutas siguiendo arquitectura modular.
-* Documentar el código y las relaciones.
-
----
-
-# 16. Evidencias
-
-## Evidencia 1
-
-<!-- INSERTAR CAPTURA AQUÍ -->
-
-## Evidencia 2
-
-<!-- INSERTAR CAPTURA AQUÍ -->
-
-## Evidencia 3
-
-<!-- INSERTAR CAPTURA AQUÍ -->
-
-## Evidencia 4
-
-<!-- INSERTAR CAPTURA AQUÍ -->

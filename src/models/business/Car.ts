@@ -130,10 +130,3 @@ Car.init(
     },
   }
 );
-
-// ================= RELATIONS =================
-
-Car.hasMany(Institution, {
-  foreignKey: "car_id",
-  as: "institutions",
-});

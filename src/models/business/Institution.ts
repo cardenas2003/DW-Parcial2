@@ -120,10 +120,3 @@ Institution.init(
     },
   }
 );
-
-// ================= RELATIONS =================
-
-Institution.belongsTo(Car, {
-  foreignKey: "car_id",
-  as: "car",
-});
